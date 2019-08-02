@@ -1,5 +1,7 @@
 package com.kaizero.spring.controller;
 
+import com.kaizero.spring.entity.Response.IPCheckResponse;
+import com.kaizero.spring.entity.Response.ResponseData;
 import lombok.Getter;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,11 +16,31 @@ import javax.servlet.http.HttpServletRequest;
 public class FirstController {
 
     @RequestMapping(value = "/room", method = RequestMethod.PUT)
-    public void addRoom(Model model) {
+    public ResponseData addRoom() {
         HttpServletRequest servletRequest = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String ip = servletRequest.getHeader("X-FORWARDED-FOR");
+
+        if (ip == null) {
+            ip = servletRequest.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null) {
+            ip = servletRequest.getHeader("WL-Proxy-Client-IP"); // 웹로직
+        }
+        if (ip == null) {
+            ip = servletRequest.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null) {
+            ip = servletRequest.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null) {
+            ip = servletRequest.getRemoteAddr();
+        }
+
         int port = servletRequest.getRemotePort();
 
-
+        IPCheckResponse response = new IPCheckResponse();
+        response.setIp(ip);
+        response.setPort(port);
+        return response;
     }
 }
